@@ -1,20 +1,22 @@
 
-DEBUG = true;           % print status
+DEBUG = false;           % print status
 L = 3;                  % number of rotations
-sigma = 1;              % noise level
+sigma = 1.2;              % noise level
 Nval = 1*[6:2:20];  % number of input signals
-RUNS = 250;               % number of iterations to run over
+RUNS = 200;               % number of iterations to run over
 
 estimator_list = {                               ...
-    @pickfirst,                                  ... % Pick first
     @CrossCorrelation,                           ... % Cross with first
     @InvarianceMethod,                           ... % Invariance method
+    @KmeansCluster,                              ... % k-means
     @angsynchshiftspec,                          ... % Do spectral angular synchornization for the shifts
-    @UGJustPhase_kmeans2,                        ... % k-means
+    @UGJustPhase_kmeans,                        ... % k-means
     @SDPugJustPhase_pos,                         ... % SDP MLE Synch recovering just shifts  
  }; 
 
-estimator_names = {'First','Cross','Invariants','Angular Sync','SDP-','SDP+'};
+%     @pickfirst,                                  ... % Pick first
+
+estimator_names = {'Cross','Invariants','K-means','Angular Sync','SDP-','SDP+'};
 
 ShiftRecovery(DEBUG, L, sigma, Nval, RUNS, estimator_list, estimator_names);
 
@@ -23,7 +25,7 @@ ShiftRecovery(DEBUG, L, sigma, Nval, RUNS, estimator_list, estimator_names);
 
 %    @InvarianceMethod,                           ... % Invariance method
 %    @angsynchshiftspec,                          ... % Do spectral angular synchornization for the shifts
-%    @UGJustPhase_kmeans2,                        ... % k-means
+%    @UGJustPhase_kmeans,                        ... % k-means
 
 %    @UGJustPhase_opt_short,                      ... % SDP-less method for MLE, round best signal to rotation 
 

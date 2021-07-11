@@ -8,7 +8,7 @@ RUNS = 1;               % number of iterations to run over
 estimator_list = {                               ...
     @pickfirst,                                  ... % Pick first
     @SDPugJustPhase, ...
-    @SDPforMLEshiftandsignalNonIndicators2,                                ... % k-means
+    @SDPforMLEshiftandsignalNonIndicators2,
 }; 
 estimator_names = {'first', 'sdp'};
 
@@ -19,7 +19,7 @@ ShiftRecovery(DEBUG, L, sigma, Nval, RUNS, estimator_list, estimator_names);
 
 %    @InvarianceMethod,                           ... % Invariance method
 %    @angsynchshiftspec,                          ... % Do spectral angular synchornization for the shifts
-%    @UGJustPhase_kmeans2,                        ... % k-means
+%    @UGJustPhase_kmeans,                        ... % k-means
 
 %    @UGJustPhase_opt_short,                      ... % SDP-less method for MLE, round best signal to rotation 
 

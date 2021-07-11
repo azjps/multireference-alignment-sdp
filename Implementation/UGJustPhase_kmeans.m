@@ -1,4 +1,4 @@
-function z = UGJustPhase_kmeans3(Y, sigma, DEBUG)
+function z = UGJustPhase_kmeans(Y, sigma, DEBUG)
     [L N] = size(Y);            % Y in R^{L x N} is N observations of Z_L signal  
     I = @(i,k) (i-1)*L + k;     % index into 2-D vector v(i,k) in R^{NL}   
    

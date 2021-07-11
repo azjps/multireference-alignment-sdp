@@ -9,7 +9,7 @@ estimator_list = {                               ...
     @pickfirst,                                  ... % Pick first
     @InvarianceMethod,                           ... % Invariance method
     @angsynchshiftspec,                          ... % Do spectral angular synchornization for the shifts
-    @UGJustPhase_kmeans2,                        ... % k-means
+    @UGJustPhase_kmeans,                        ... % k-means
 }; 
 
 estimator_names = {'First','Invariants','Angular Sync','SDP-'};
@@ -21,7 +21,7 @@ ShiftRecovery(DEBUG, L, sigma, Nval, RUNS, estimator_list, estimator_names);
 
 %    @InvarianceMethod,                           ... % Invariance method
 %    @angsynchshiftspec,                          ... % Do spectral angular synchornization for the shifts
-%    @UGJustPhase_kmeans2,                        ... % k-means
+%    @UGJustPhase_kmeans,                        ... % k-means
 
 %    @UGJustPhase_opt_short,                      ... % SDP-less method for MLE, round best signal to rotation 
 
