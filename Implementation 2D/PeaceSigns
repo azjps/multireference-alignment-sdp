@@ -1,0 +1,29 @@
+clf
+
+L = 100;        % number of rotations to draw from
+R = 100;        % number of radial discretizations
+Nval = 40:1:40;         % number of pictures
+RUNS = 1;       % number of iterations to average over
+sigma = 4;     % level of noise
+DEBUG = false;
+
+%# load image
+[img2, map] = rgb2ind(imread('peace_sign.jpg'), 128);
+% hack for peace sign
+[r c] = size(img2);
+img = 4*ones(800, 800);
+img(10:10+r-1,100:100+c-1) = img2;
+
+%load spine
+%img = X
+figure(3)
+subplot(331), imshow(img, map), axis off square
+
+subplot(332), warp(imag(zoff), real(zoff), zeros(size(zoff)), RotateImage(pim, 0, 0), map), axis off square
+view(2)
+
+subplot(334), warp(imag(zoff), real(zoff), zeros(size(zoff)), RotateImage(pim, round(L/5), sigma), map), axis off square
+view(2)
+
+subplot(335), warp(imag(zoff), real(zoff), zeros(size(zoff)), RotateImage(Yest, 0, 0), map), axis off square
+view(2)

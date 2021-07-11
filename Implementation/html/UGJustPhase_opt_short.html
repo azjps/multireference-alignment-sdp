@@ -1,0 +1,147 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>UGJustPhase_opt_short</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-02-18"><meta name="DC.source" content="UGJustPhase_opt_short.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">componentwise fft</a></li><li><a href="#4">rounding one signal's vector to indicator vector</a></li><li><a href="#5">choose best rotation for each image</a></li></ul></div><pre class="codeinput"><span class="comment">% Y is in R^{L x N} is N observations of signal on Z_L</span>
+<span class="comment">% sigma is the standard deviation of the additive Gaussian noise</span>
+<span class="comment">% DEBUG is a boolean flag as to whether to print debug information</span>
+<span class="keyword">function</span> z = UGJustPhase_opt_short(Y, sigma, DEBUG)
+</pre><pre class="codeinput">    [L N] = size(Y);
+    I1 = @(i,k) (i-1)*L + k;    <span class="comment">% index into 2-D vector v(i,k) in R^{NL}</span>
+    I2 = @(i,k) (k-1)*N + i;    <span class="comment">% index into 2-D vector v(k,i) in R^{LN}</span>
+    P = zeros(N*L,N*L);         <span class="comment">% permutation matrix</span>
+    <span class="keyword">for</span> i = 1:N
+        <span class="keyword">for</span> k = 1:L
+            P(I1(i,k), I2(i,k)) = 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    DFT = kron(conj(dftmtx(L)) / sqrt(L), eye(N)) * P';     <span class="comment">% block DFT</span>
+</pre><pre class="codeoutput">Input argument "Y" is undefined.
+
+Error in ==&gt; UGJustPhase_opt_short at 5
+    [L N] = size(Y);
+</pre><h2>componentwise fft<a name="3"></a></h2><pre class="codeinput">    V_DFT = zeros(N*L,L);       <span class="comment">% C = V_DFT*V_DFT'/L is data Gram matrix</span>
+    <span class="keyword">for</span> i = 1:N                 <span class="comment">% gram(k) = &lt;R{k-1}*Y_i, Y_1&gt;</span>
+        gram = arrayfun(@(k) circshift(Y(:,i), k-1)' * Y(:,1), 1:L);
+        Fc = fft(gram);
+        <span class="keyword">for</span> k = 1:L
+            V_DFT(I2(i,k), k) = sign(Fc(k));
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><h2>rounding one signal's vector to indicator vector<a name="4"></a></h2><pre class="codeinput">    V = DFT' * V_DFT;
+    [rL, rN] = deal(1,1);
+    basis_vector = zeros(L,1);
+    basis_vector(rL) = 1;
+    v = real(V * (V(I1(rN,1):I1(rN,L), 1:L) \ basis_vector));
+</pre><h2>choose best rotation for each image<a name="5"></a></h2><pre class="codeinput">    z = zeros(L,1);
+    <span class="keyword">for</span> i = 1:N
+        [M,R] = max(v(I1(i,1):I1(i,L)));
+        z = z + circshift(Y(:,i), -R+1);
+    <span class="keyword">end</span>
+    z = real(PowerSpectrumCorrection(z/N,Y,sigma));
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+% Y is in R^{L x N} is N observations of signal on Z_L 
+% sigma is the standard deviation of the additive Gaussian noise
+% DEBUG is a boolean flag as to whether to print debug information
+function z = UGJustPhase_opt_short(Y, sigma, DEBUG)
+    [L N] = size(Y);
+    I1 = @(i,k) (i-1)*L + k;    % index into 2-D vector v(i,k) in R^{NL}   
+    I2 = @(i,k) (k-1)*N + i;    % index into 2-D vector v(k,i) in R^{LN}
+    P = zeros(N*L,N*L);         % permutation matrix
+    for i = 1:N
+        for k = 1:L
+            P(I1(i,k), I2(i,k)) = 1;
+        end
+    end
+    DFT = kron(conj(dftmtx(L)) / sqrt(L), eye(N)) * P';     % block DFT
+
+    %% componentwise fft 
+    V_DFT = zeros(N*L,L);       % C = V_DFT*V_DFT'/L is data Gram matrix
+    for i = 1:N                 % gram(k) = <R{k-1}*Y_i, Y_1>
+        gram = arrayfun(@(k) circshift(Y(:,i), k-1)' * Y(:,1), 1:L); 
+        Fc = fft(gram);
+        for k = 1:L
+            V_DFT(I2(i,k), k) = sign(Fc(k));
+        end
+    end
+    
+    %% rounding one signal's vector to indicator vector
+    V = DFT' * V_DFT;
+    [rL, rN] = deal(1,1);
+    basis_vector = zeros(L,1);
+    basis_vector(rL) = 1;
+    v = real(V * (V(I1(rN,1):I1(rN,L), 1:L) \ basis_vector));
+    
+    %% choose best rotation for each image
+    z = zeros(L,1); 
+    for i = 1:N
+        [M,R] = max(v(I1(i,1):I1(i,L)));
+        z = z + circshift(Y(:,i), -R+1);
+    end
+    z = real(PowerSpectrumCorrection(z/N,Y,sigma));
+end
+##### SOURCE END #####
+--></body></html>
